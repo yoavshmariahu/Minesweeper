@@ -12,16 +12,17 @@ def main():
         boxes.append([[]])
         for j in range(8):
             box = Rectangle(Point(i * 50 + 50,j * 50 + 50), Point(i * 50 + 95, j * 50 + 95))
-            if random.randint(1, 5) == 1:
+            if random.randint(1, 8) == 1:
                 box.isBomb = True
                 boxesLeft -= 1
             else:
                 box.isBomb = False
             boxes[i + 1].append(box)
             boxes[i + 1][j + 1].draw(win)
-        boxes[i].append([])
+        boxes[i + 1].append([])
+    boxes.append([])
     for i in range(10):
-        boxes[0].append([])
+        boxes[9].append([])
 
     gameOver = False
 
@@ -29,7 +30,7 @@ def main():
         bombs = 0
         for i in range(-1, 2):
             for j in range(-1, 2):
-                if boxes[row + i ][col + j] and boxes[row + i][col + j].isBomb:
+                if boxes[row + i][col + j] and boxes[row + i][col + j].isBomb:
                     bombs += 1
         return bombs
 
@@ -39,7 +40,7 @@ def main():
                 if boxes[i][j].isBomb:
                     boxes[i][j].setFill("#f45942")
 
-    while not gameOver:
+    while not gameOver and boxesLeft != 0:
         point = win.getMouse()
         row = int((point.getX() - 50) // 50) + 1
         col = int((point.getY() - 50) // 50) + 1
@@ -49,6 +50,7 @@ def main():
                 box.setFill("#f45942")
                 gameOver = True
             else:
+                boxesLeft -= 1
                 box.setFill("#4286f4")
                 text = Text(box.getCenter(), str(bombsAround(row, col)))
                 text.setTextColor("#302e2e")
@@ -65,9 +67,6 @@ def main():
         textDisplay.setText("You Lost :(")
     textDisplay.draw(win)
     win.getMouse()
-
-
-
 
 
 main()
