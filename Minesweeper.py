@@ -45,6 +45,33 @@ def main():
                     bombs += 1
         return bombs
 
+    def reveal(row, col):
+        nonlocal boxesLeft
+        b = grid[row][col]
+        if b.isRevealed:
+            return
+        boxesLeft -= 1
+        b.isRevealed = True
+        if b.isBomb:
+            b.setFill("#f45942")
+        else:
+            b.setFill("#4286f4")
+            bombs = bombsAround(row, col)
+            if bombs > 0:
+                text = Text(b.getCenter(), str(bombs))
+                text.setTextColor("#302e2e")
+                text.setSize(20)
+                text.draw(win)
+            else:
+                queue = []
+                for i in range(-1, 2):
+                    for j in range(-1, 2):
+                        if grid[row + i][col + j] and not grid[row + i][col + j].isBomb:
+                            queue.append((row + i, col + j))
+                while len(queue) > 0:
+                    item = queue.pop()
+                    reveal(item[0], item[1])
+
     def revealBombs():
         # Display all bombs on grid
         for i in range(1, 9):
@@ -56,18 +83,14 @@ def main():
     score.setSize(20)
     score.draw(win)
 
-    
-
     firstClick = True
     while not gameOver and boxesLeft != 0:
-        score.setText("Score: " + str(54 - boxesLeft))
         point = win.getMouse()
         row = int((point.getX() - 50) // 50) + 1
         col = int((point.getY() - 50) // 50) + 1
         box = grid[row][col]
         if box.contains(point) and not box.isRevealed:
             if box.isBomb and not firstClick:
-                box.setFill("#f45942")
                 gameOver = True
             else:
                 if firstClick and box.isBomb:
@@ -75,19 +98,12 @@ def main():
                     box.isBomb = False
                     altIdx = bombIdx.pop()
                     grid[altIdx // 8 + 1][altIdx % 8 + 1].isBomb = True
-                boxesLeft -= 1
-                box.isRevealed = True
-                box.setFill("#4286f4")
-                bombs = bombsAround(row, col)
-                if bombs > 0:
-                    text = Text(box.getCenter(), str(bombs))
-                    text.setTextColor("#302e2e")
-                    text.setSize(20)
-                    text.draw(win)
+                reveal(row, col)
+        score.setText("Score: " + str(54 - boxesLeft))
         firstClick = False
 
     textDisplay = Text(Point(250, 250), "")
-    textDisplay.setSize(30)
+    textDisplay.setSize(35)
     textDisplay.setTextColor("#302e2e")
     if boxesLeft == 0:
         textDisplay.setText("You Won!")
